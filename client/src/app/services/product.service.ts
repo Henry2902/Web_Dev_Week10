@@ -1,41 +1,63 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+
+import { AngularFirestore, AngularFirestoreCollection } from '@angular/fire/compat/firestore';
+
 import { Product } from '../models/product.model';
 
-const baseUrl = 'http://localhost:8080/api/products';
+ 
 
 @Injectable({
+
   providedIn: 'root'
+
 })
+
 export class ProductService {
-  constructor(private http: HttpClient) { }
 
-  getAll(): Observable<Product[]> {
-    return this.http.get<Product[]>(baseUrl);
+  private dbPath = '/products';
+
+ 
+
+  productsRef: AngularFirestoreCollection<Product>;
+
+ 
+
+  constructor(private db: AngularFirestore) {
+
+    this.productsRef = db.collection(this.dbPath);
+
   }
 
-  get(id: any): Observable<Product> {
-    return this.http.get(`${baseUrl}/${id}`);
+ 
+
+  getAll(): AngularFirestoreCollection<Product> {
+
+    return this.productsRef;
+
   }
 
-  create(data: any): Observable<any> {
-    return this.http.post(baseUrl, data);
+ 
+
+  create(product: Product): any {
+
+    return this.productsRef.add({ ...product });
+
   }
 
-  update(id: any, data: any): Observable<any> {
-    return this.http.put(`${baseUrl}/${id}`, data);
+ 
+
+  update(id: string, data: any): Promise<void> {
+
+    return this.productsRef.doc(id).update(data);
+
   }
 
-  delete(id: any): Observable<any> {
-    return this.http.delete(`${baseUrl}/${id}`);
+ 
+
+  delete(id: string): Promise<void> {
+
+    return this.productsRef.doc(id).delete();
+
   }
 
-  deleteAll(): Observable<any> {
-    return this.http.delete(baseUrl);
-  }
-
-  findByName(name: any): Observable<Product[]> {
-    return this.http.get<Product[]>(`${baseUrl}?name=${name}`);
-  }
 }
